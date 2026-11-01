@@ -1,0 +1,51 @@
+### Requisições para a extensão "REST Client" (humao.rest-client).
+### Clique em "Send Request" acima de cada bloco. No Windows isto evita o problema do
+### `curl` do PowerShell (que é um alias de Invoke-WebRequest).
+
+@gateway = http://localhost:8080
+@transitLocal = http://localhost:8081
+@appointmentsLocal = http://localhost:8082
+
+### ---------- Via gateway (docker compose up --build) ----------
+
+### Chegadas da linha 23 (veja o header X-Served-By alternar entre transit-1 e transit-2)
+GET {{gateway}}/api/transit/routes/23/arrivals
+
+### Publicar alerta de trânsito (gera evento TransitAlertCreated)
+POST {{gateway}}/api/transit/alerts
+Content-Type: application/json
+
+{"routeId":"23","message":"Atraso na linha"}
+
+### Criar agendamento
+# @name createAppointment
+POST {{gateway}}/api/appointments
+Content-Type: application/json
+
+{"citizenId":"cid-42","officeId":"centro","startsAt":"2026-11-01T14:00:00Z"}
+
+### Consultar o agendamento criado acima
+GET {{gateway}}/api/appointments/{{createAppointment.response.body.id}}
+
+### Repetir o mesmo horário/escritório deve retornar 409 Conflict
+POST {{gateway}}/api/appointments
+Content-Type: application/json
+
+{"citizenId":"cid-99","officeId":"centro","startsAt":"2026-11-01T14:00:00Z"}
+
+### Validação: corpo inválido deve retornar 400
+POST {{gateway}}/api/transit/alerts
+Content-Type: application/json
+
+{"routeId":"","message":""}
+
+### Health do gateway
+GET {{gateway}}/health
+
+### ---------- Direto nos serviços (rodando pelo VS Code) ----------
+
+### Transit local
+GET {{transitLocal}}/api/transit/routes/23/arrivals
+
+### Health do Appointments local
+GET {{appointmentsLocal}}/actuator/health

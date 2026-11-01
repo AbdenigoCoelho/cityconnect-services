@@ -1,0 +1,102 @@
+x-java-service: &java-service
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD", "curl", "-fsS", "http://localhost:8080/actuator/health"]
+    interval: 10s
+    timeout: 3s
+    retries: 10
+    start_period: 40s
+
+x-rabbit-env: &rabbit-env
+  RABBITMQ_HOST: rabbitmq
+  RABBITMQ_USER: cityconnect
+  RABBITMQ_PASSWORD: cityconnect-dev   # apenas desenvolvimento
+
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: cityconnect
+      RABBITMQ_DEFAULT_PASS: cityconnect-dev   # apenas desenvolvimento
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  transit-1:
+    <<: *java-service
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+      args:
+        SERVICE_PATH: services/transit-service
+    environment:
+      <<: *rabbit-env
+      SERVER_PORT: "8080"
+      INSTANCE_NAME: transit-1
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  transit-2:
+    <<: *java-service
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+      args:
+        SERVICE_PATH: services/transit-service
+    environment:
+      <<: *rabbit-env
+      SERVER_PORT: "8080"
+      INSTANCE_NAME: transit-2
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  appointments:
+    <<: *java-service
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+      args:
+        SERVICE_PATH: services/appointments-service
+    environment:
+      SERVER_PORT: "8080"
+
+  notification:
+    <<: *java-service
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+      args:
+        SERVICE_PATH: services/notification-service
+    environment:
+      <<: *rabbit-env
+      SERVER_PORT: "8080"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+  gateway:
+    image: nginx:1.27-alpine
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./gateway/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      transit-1:
+        condition: service_healthy
+      transit-2:
+        condition: service_healthy
+      appointments:
+        condition: service_healthy
+
+volumes:
+  rabbitmq-data:

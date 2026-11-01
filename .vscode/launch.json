@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "java",
+      "name": "Transit Service (:8081)",
+      "request": "launch",
+      "mainClass": "com.cityconnect.transit.TransitApplication",
+      "projectName": "transit-service",
+      "env": { "INSTANCE_NAME": "transit-local" }
+    },
+    {
+      "type": "java",
+      "name": "Appointments Service (:8082)",
+      "request": "launch",
+      "mainClass": "com.cityconnect.appointments.AppointmentsApplication",
+      "projectName": "appointments-service"
+    },
+    {
+      "type": "java",
+      "name": "Notification Service (:8083)",
+      "request": "launch",
+      "mainClass": "com.cityconnect.notification.NotificationApplication",
+      "projectName": "notification-service"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Todos os serviços (local)",
+      "configurations": [
+        "Transit Service (:8081)",
+        "Appointments Service (:8082)",
+        "Notification Service (:8083)"
+      ],
+      "stopAll": true
+    }
+  ]
+}

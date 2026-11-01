@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Maven: build + testes",
+      "type": "shell",
+      "command": "mvn -B package",
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": []
+    },
+    {
+      "label": "Maven: build sem testes",
+      "type": "shell",
+      "command": "mvn -B package -DskipTests",
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: só o RabbitMQ (para rodar serviços pelo VS Code)",
+      "type": "shell",
+      "command": "docker compose up -d rabbitmq",
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: subir tudo",
+      "type": "shell",
+      "command": "docker compose up --build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: derrubar tudo",
+      "type": "shell",
+      "command": "docker compose down",
+      "problemMatcher": []
+    }
+  ]
+}

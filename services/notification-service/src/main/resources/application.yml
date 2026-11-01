@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: notification-service
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:cityconnect}
+    password: ${RABBITMQ_PASSWORD:cityconnect-dev}   # apenas desenvolvimento
+    listener:
+      simple:
+        prefetch: 10
+        # Mensagem que falha não volta para a fila em laço infinito: após o retry,
+        # é rejeitada e segue para a dead-letter queue (ver RabbitConfig).
+        default-requeue-rejected: false
+        retry:
+          enabled: true
+          initial-interval: 1s
+          multiplier: 2
+          max-interval: 10s
+          max-attempts: 4
+
+server:
+  port: ${SERVER_PORT:8083}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

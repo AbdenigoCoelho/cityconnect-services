@@ -1,0 +1,17 @@
+{
+  "java.configuration.updateBuildConfiguration": "automatic",
+  "java.import.maven.enabled": true,
+  "java.compile.nullAnalysis.mode": "disabled",
+  "java.debug.settings.onBuildFailureProceed": false,
+  "java.test.config": { "workingDirectory": "${workspaceFolder}" },
+  "files.exclude": {
+    "**/target": true,
+    "**/.classpath": true,
+    "**/.project": true,
+    "**/.settings": true,
+    "**/.factorypath": true
+  },
+  "editor.formatOnSave": false,
+  "[java]": { "editor.tabSize": 4 },
+  "[yaml]": { "editor.tabSize": 2 }
+}
